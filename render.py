@@ -39,13 +39,21 @@ FUNCTION        = lambda x, n : np.power(-1,n+1) / n       # FUNCTION EXPRESSION
 
 def summation(function, domain, kernel = KERNEL, N = 0, M = 1):        # SUMMATION LIMIT MUST BE INCREASED BY 1 AS A RESULT OF CONVENTION
 
+    print("//-------------------------")
+    print("//   COMPUTING")
+    print("//-------------------------")
+
     S_m = np.zeros(domain.size)                                     # INITIALIZATION
     for k in range(N,M):
         S_m = S_m + np.real(function(domain,k)*kernel(domain,k))             # SUMMATION
+
+    print("//   PLOTTING")
+    print("//-------------------------")
+
     return S_m
 
 DOMAIN          = np.linspace(X_LIM_INF,X_LIM_SUP,RESOLUTION)
-DATA            = summation(FUNCTION, DOMAIN, N=1, M=5)
+DATA            = summation(FUNCTION, DOMAIN, N=1, M=100+1)
 
 # PLOT INITIALIZATION
 
@@ -65,4 +73,7 @@ ax.tick_params(axis="x", direction="in", labelsize=TICK_FONT_SIZE)
 # ax.set_title('hi mom')
 # ax.grid(True)
 
-canvas.print_figure('test', bbox_inches="tight")
+print("//   RENDERING")
+print("//-------------------------")
+
+canvas.print_figure('test')
