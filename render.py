@@ -3,57 +3,65 @@ from matplotlib.figure import Figure
 from matplotlib import rc
 import numpy as np
 
-rc("text", usetex=True)
+rc("text", usetex=True)                         # USE TEX FOR RENDERING TEXT
 
-# CONSTANTS
+# CONSTANTS AND KERNELS
 
-PI          = np.pi                             # VALUE OF PI
-KERNEL      = lambda x, n : np.sin(n * x)                  # DEFAUT IS x, n -> 1
+PI              = np.pi                             # VALUE OF PI
+SIN_KERNEL      = lambda x, n : np.sin(n * x)       # SINE KERNEL
+COS_KERNEL      = lambda x, n : np.cos(n * x)       # COSINE KERNEL
+EXP_KERNEL      = lambda x, n : np.exp(1j * n * x)  # COMPLEX EXPONENTIAL KERNEL
+ONE_KERNEL      = lambda x, n : 1                   # 1-KERNEL
 
 # CANVAS PARAMETERS
 
 WIDTH       = 8                                 # WIDTH OF CANVAS IN INCHES
 HEIGHT      = 8                                 # HEIGHT OF CANVAS IN INCHES
 DPI         = 140                               # DOTS PER INCH
-RESOLUTION  = int(WIDTH * DPI)
+RESOLUTION  = int(WIDTH * DPI)                  # RESOLUTION OF PLOT
 
 # PLOT PARAMETERS
 
-X_LIM_INF       = -PI
-X_LIM_SUP       = PI
+X_LIM_INF       = -2 * PI                       # LOWER X BOUND
+X_LIM_SUP       = 2 * PI                        # UPPER X BOUND
 
+Y_LIM_INF       = -2                            # LOWER Y BOUND
+Y_LIM_SUP       = 2                             # UPPER Y BOUND
 
-Y_LIM_INF       = -2
-Y_LIM_SUP       = 2
-
-LABEL_PAD       = 12                            # SPACING BETWEEN LABEL AND AXIS IN PT
+LABEL_PAD       = 12                            # SPACING BETWEEN LABELS AND AXES IN PT
 LABEL_FONT_SIZE = 18                            # FONT SIZE FOR LABELS
 TICK_FONT_SIZE  = 12                            # FONT SIZE FOR TICKS
 
-X_LABEL = "$z$"
-Y_LABEL = "$f(z)$"
+X_LABEL         = "$z$"
+Y_LABEL         = "$f(z)$"
 
-# PLOT DATA
+FILENAME        = "fourier_test"
 
-FUNCTION        = lambda x, n : np.power(-1,n+1) / n       # FUNCTION EXPRESSIONS
+# COEFFICIENT FUNCTIONS
 
-def summation(function, domain, kernel = KERNEL, N = 0, M = 1):        # SUMMATION LIMIT MUST BE INCREASED BY 1 AS A RESULT OF CONVENTION
+FUNCTION        = lambda x, n : np.power(-1,n+1) / n
+
+def summation(function, domain, kernel = ONE_KERNEL, N = 0, M = 1):
+
+    # SUMMATION LIMIT MUST BE INCREASED BY 1 AS A RESULT OF CONVENTION
 
     print("//-------------------------")
     print("//   COMPUTING")
     print("//-------------------------")
 
-    S_m = np.zeros(domain.size)                                     # INITIALIZATION
+    S_m = np.zeros(domain.size)                                             # INITIALIZATION
     for k in range(N,M):
-        S_m = S_m + np.real(function(domain,k)*kernel(domain,k))             # SUMMATION
+        S_m = S_m + np.real(function(domain,k)*kernel(domain,k))            # SUMMATION
 
     print("//   PLOTTING")
     print("//-------------------------")
 
     return S_m
 
+# PLOT DATA
+
 DOMAIN          = np.linspace(X_LIM_INF,X_LIM_SUP,RESOLUTION)
-DATA            = summation(FUNCTION, DOMAIN, N=1, M=100+1)
+DATA            = summation(FUNCTION, DOMAIN, kernel = SIN_KERNEL, N=1, M=10+1)
 
 # PLOT INITIALIZATION
 
@@ -76,4 +84,4 @@ ax.tick_params(axis="x", direction="in", labelsize=TICK_FONT_SIZE)
 print("//   RENDERING")
 print("//-------------------------")
 
-canvas.print_figure('test')
+canvas.print_figure('assets/' + FILENAME)
