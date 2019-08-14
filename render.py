@@ -13,6 +13,18 @@ COS_KERNEL      = lambda x, n : np.cos(n * x)       # COSINE KERNEL
 EXP_KERNEL      = lambda x, n : np.exp(1j * n * x)  # COMPLEX EXPONENTIAL KERNEL
 ONE_KERNEL      = lambda x, n : 1                   # 1-KERNEL
 
+# HELPER FUNCTIONS
+
+def summation(function, domain, kernel = ONE_KERNEL, N = 0, M = 1):
+
+    # SUMMATION LIMIT MUST BE INCREASED BY 1 AS A RESULT OF CONVENTION
+
+    S_m = np.zeros(domain.size)                                             # INITIALIZATION
+    for k in range(N,M):
+        S_m = S_m + function(domain,k)*kernel(domain,k)                     # SUMMATION
+
+    return S_m
+
 # CANVAS PARAMETERS
 
 WIDTH       = 8                                 # WIDTH OF CANVAS IN INCHES
@@ -22,11 +34,11 @@ RESOLUTION  = int(WIDTH * DPI)                  # RESOLUTION OF PLOT
 
 # PLOT PARAMETERS
 
-X_LIM_INF       = -2 * PI                       # LOWER X BOUND
-X_LIM_SUP       = 2 * PI                        # UPPER X BOUND
+X_LIM_INF       = -PI                       # LOWER X BOUND
+X_LIM_SUP       = PI                        # UPPER X BOUND
 
-Y_LIM_INF       = -2                            # LOWER Y BOUND
-Y_LIM_SUP       = 2                             # UPPER Y BOUND
+Y_LIM_INF       = -1.25                          # LOWER Y BOUND
+Y_LIM_SUP       = 1.25                           # UPPER Y BOUND
 
 LABEL_PAD       = 12                            # SPACING BETWEEN LABELS AND AXES IN PT
 LABEL_FONT_SIZE = 18                            # FONT SIZE FOR LABELS
@@ -39,35 +51,18 @@ FILENAME        = "fourier_test"
 
 # COEFFICIENT FUNCTIONS
 
-FUNCTION        = lambda x, n : np.power(-1,n+1) / n
-
-def summation(function, domain, kernel = ONE_KERNEL, N = 0, M = 1):
-
-    # SUMMATION LIMIT MUST BE INCREASED BY 1 AS A RESULT OF CONVENTION
-
-    print("//-------------------------")
-    print("//   COMPUTING")
-    print("//-------------------------")
-
-    S_m = np.zeros(domain.size)                                             # INITIALIZATION
-    for k in range(N,M):
-        S_m = S_m + np.real(function(domain,k)*kernel(domain,k))            # SUMMATION
-
-    print("//   PLOTTING")
-    print("//-------------------------")
-
-    return S_m
+FUNCTION        = lambda x, n : (2/(PI * n)) * (np.cos(n * PI / 2) - np.cos(n * PI))
+CONSTANT        = 0
 
 # PLOT DATA
 
 DOMAIN          = np.linspace(X_LIM_INF,X_LIM_SUP,RESOLUTION)
-DATA            = summation(FUNCTION, DOMAIN, kernel = SIN_KERNEL, N=1, M=10+1)
+DATA            = (CONSTANT * np.ones(DOMAIN.size)) + summation(FUNCTION, DOMAIN, kernel = SIN_KERNEL, N=1, M=30+1)
 
 # PLOT INITIALIZATION
 
 fig = Figure(figsize=(WIDTH,HEIGHT), dpi=DPI)
 canvas = FigureCanvas(fig)
-
 
 ax = fig.add_subplot(111)
 ax.plot(DOMAIN,DATA)
@@ -80,8 +75,5 @@ ax.tick_params(axis="x", direction="in", labelsize=TICK_FONT_SIZE)
 
 # ax.set_title('hi mom')
 # ax.grid(True)
-
-print("//   RENDERING")
-print("//-------------------------")
 
 canvas.print_figure('assets/' + FILENAME)
