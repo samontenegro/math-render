@@ -16,20 +16,20 @@ def enum(value,pad):
 def init_directories():
 
     try:
-        print("Making base directory...")
         mkdir(BASE_PATH)
+        print("Making base directory...")
     except FileExistsError:
         pass
 
     try:
-        print("Making image directory...")
         mkdir(BASE_PATH + IMG_PATH)
+        print("Making image directory...")
     except FileExistsError:
         pass
     
     try:
-        print("Making video directory...")
         mkdir(BASE_PATH + VID_PATH)
+        print("Making video directory...")
     except FileExistsError:
         pass
 
