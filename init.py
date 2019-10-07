@@ -5,6 +5,9 @@ IMG_PATH    = "/img"
 VID_PATH    = "/vid"
 
 def enum(value,pad):
+    if pad == 0:
+        return str(value)
+    
     _valueString = str(value)
     if len(_valueString) > pad:
         pass

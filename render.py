@@ -1,6 +1,7 @@
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib import rc
+from string import Template
 from os import system
 import numpy as np
 import sys
@@ -12,11 +13,6 @@ import init
 rc("text", usetex=True)                         # USE TeX FOR RENDERING TEXT
 np.seterr(all='raise')                          # RAISE NUMPY WARNINGS AS ERRORS
 
-# FLAGS
-
-TERMS = int(sys.argv[1]) > 0 and int(sys.argv[1]) or 0
-VIDEO = len(sys.argv) == 3 and sys.argv[2] or ""
-
 # CONSTANTS AND KERNELS
 
 PI              = np.pi                             # VALUE OF PI
@@ -27,7 +23,7 @@ ONE_KERNEL      = lambda x, n : 1                   # 1-KERNEL
 
 # LOAD COEFFS FROM CSV
 
-COEFF_FILENAME = "coeffs.csv"
+COEFF_FILENAME = "data/potential.csv"
 COEFF_ARRAY = GenericCoefficientArray(COEFF_FILENAME)
 
 # AUXILIARY CONSTANTS
@@ -63,31 +59,31 @@ RESOLUTION  = int(WIDTH * DPI)                  # RESOLUTION OF PLOT
 
 # PLOT PARAMETERS
 
-X_LIM_INF       = -1*PI                       # LOWER X BOUND
-X_LIM_SUP       = 1*PI                        # UPPER X BOUND
+X_LIM_INF       = -2*PI                       # LOWER X BOUND
+X_LIM_SUP       = 2*PI                        # UPPER X BOUND
 
-Y_LIM_INF       = -0.1                          # LOWER Y BOUND
-Y_LIM_SUP       = 1.0                           # UPPER Y BOUND
+Y_LIM_INF       = 0.0                          # LOWER Y BOUND
+Y_LIM_SUP       = 3.5                           # UPPER Y BOUND
 
 LABEL_PAD       = 12                            # SPACING BETWEEN LABELS AND AXES IN PLOT
 LABEL_FONT_SIZE = 18                            # FONT SIZE FOR LABELS
 TICK_FONT_SIZE  = 12                            # FONT SIZE FOR TICKS
 
 X_LABEL         = "$x$"
-Y_LABEL         = "$S_N (x)$"
+Y_LABEL         = lambda N : Template("$$S_ {$N} (x)$$").substitute(N = N)
 COLOR           = "b"
 
-FILENAME        = "fourier_test_spike"
+FILENAME        = "fourier_test_potential"
 
 # VIDEO PARAMETERS
 
 FRAMERATE   = 10
-ZERO_PAD    = 3
+ZERO_PAD    = 2             # DEFAULT
 
 # COEFFICIENT FUNCTIONS
 
-FUNCTION        = lambda x, n : (1/PI) * COEFF_ARRAY.coeff(n)
-CONSTANT        = (1/ (2*PI)) * 2 * np.arctan(K*PI) / K
+FUNCTION        = lambda x, n : COEFF_ARRAY.coeff(n)
+CONSTANT        = 1.53609
 
 # PLOT DATA
 
@@ -103,30 +99,65 @@ ax = fig.add_subplot(111)
 ax.set_xlim(X_LIM_INF, X_LIM_SUP)
 ax.set_ylim(Y_LIM_INF, Y_LIM_SUP)
 ax.set_xlabel(X_LABEL, labelpad=LABEL_PAD, fontsize=LABEL_FONT_SIZE)
-ax.set_ylabel(Y_LABEL, labelpad=LABEL_PAD, fontsize=LABEL_FONT_SIZE)
+
+# Y LABEL IS SET WHILE PLOTTING
 ax.tick_params(axis="y", direction="in", labelsize=TICK_FONT_SIZE)
 ax.tick_params(axis="x", direction="in", labelsize=TICK_FONT_SIZE)
+
+# FLAGS
+
+TERMS   = 10        # DEFAULT
+VIDEO   = False
+FORMAT  = "png"
+SEQ     = False
+BBOX    = None 
+
+def parse_flags(argv):
+
+    global VIDEO
+    global TERMS
+    global FORMAT
+    global SEQ
+    global ZERO_PAD
+    global BBOX
+    global FRAMERATE
+
+    for i in range(1,len(argv)):
+        flag = argv[i]
+
+        if flag == "-video":
+            VIDEO = True
+            FRAMERATE = int(argv[i +1]) if int(argv[i +1]) > 0 else 10
+        elif flag == "-terms":
+            TERMS = int(argv[i +1])
+            ZERO_PAD = len(argv[i +1])
+        elif flag == "-format":
+            FORMAT = argv[i + 1]
+        elif flag == "-seq":
+            SEQ = True
+        elif flag == "-tight":
+            BBOX = "tight"
+
+parse_flags(sys.argv)
 
 # PLOTTING
 
 PATH = "assets/img/" + FILENAME
 
-if VIDEO == "-v":
+if SEQ or VIDEO:
     for i in range(1,TERMS + 1):
-        
+        ax.set_ylabel(Y_LABEL(i), labelpad=LABEL_PAD, fontsize=LABEL_FONT_SIZE)
         _line = ax.plot(DOMAIN,DATA(i), COLOR)
-        canvas.print_figure(PATH + enum(i, ZERO_PAD))
+        canvas.print_figure(PATH + enum(i, ZERO_PAD) + "." + FORMAT, format=FORMAT, bbox_inches=BBOX)
         _line.pop(0).remove()
-    
-    _render_with_ffmpeg = (
-        "ffmpeg -framerate " + str(FRAMERATE) + " -i " +
-        PATH + "%0" + str(ZERO_PAD) + "d.png " +
-        "assets/vid/" + FILENAME + ".mp4"
-    )
-
-    system(_render_with_ffmpeg)
+    if VIDEO:
+        _render_with_ffmpeg = (
+            "ffmpeg -framerate " + str(FRAMERATE) + " -i " +
+            PATH + "%0" + str(ZERO_PAD) + "d." + FORMAT + " "
+            "assets/vid/" + FILENAME + ".mp4"
+        )
+        system(_render_with_ffmpeg)
 else:
+    ax.set_ylabel(Y_LABEL(TERMS), labelpad=LABEL_PAD, fontsize=LABEL_FONT_SIZE)
     ax.plot(DOMAIN,DATA(TERMS), COLOR)
-    canvas.print_figure(PATH)
-
-
+    canvas.print_figure(PATH + "." + FORMAT, format=FORMAT, bbox_inches=BBOX)
