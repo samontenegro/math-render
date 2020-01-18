@@ -52,9 +52,9 @@ def summation(function, domain, kernel = ONE_KERNEL, N = 0, M = 0):
     
 # CANVAS PARAMETERS
 
-WIDTH       = 8                                 # WIDTH OF CANVAS IN INCHES
-HEIGHT      = 8                                 # HEIGHT OF CANVAS IN INCHES
-DPI         = 140                               # DOTS PER INCH
+WIDTH       = 8                                 # WIDTH OF CANVAS IN INCHES, def: 8
+HEIGHT      = 8                                 # HEIGHT OF CANVAS IN INCHES def: 8
+DPI         = 96                               	# DOTS PER INCH
 RESOLUTION  = int(WIDTH * DPI)                  # RESOLUTION OF PLOT
 
 # PLOT PARAMETERS
@@ -65,9 +65,9 @@ X_LIM_SUP       = 2*PI                        # UPPER X BOUND
 Y_LIM_INF       = 0.0                          # LOWER Y BOUND
 Y_LIM_SUP       = 3.5                           # UPPER Y BOUND
 
-LABEL_PAD       = 12                            # SPACING BETWEEN LABELS AND AXES IN PLOT
-LABEL_FONT_SIZE = 18                            # FONT SIZE FOR LABELS
-TICK_FONT_SIZE  = 12                            # FONT SIZE FOR TICKS
+LABEL_PAD       = 12                            # SPACING BETWEEN LABELS AND AXES IN PLOT, def: 12
+LABEL_FONT_SIZE = 18                            # FONT SIZE FOR LABELS, def: 18
+TICK_FONT_SIZE  = 12                            # FONT SIZE FOR TICKS, def: 12
 
 X_LABEL         = "$x$"
 Y_LABEL         = lambda N : Template("$$S_ {$N} (x)$$").substitute(N = N)
